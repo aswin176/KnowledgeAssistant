@@ -181,7 +181,7 @@ class JobResponse(BaseModel):
 
 # Settings
 class SettingsResponse(BaseModel):
-    ollama_model: str
+    llm_model: str
     neo4j_connected: bool
     llm_available: bool
     supported_import_formats: list[str]

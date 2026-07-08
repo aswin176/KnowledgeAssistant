@@ -13,12 +13,6 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
-  ollama:
-    image: ollama/ollama:latest
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: unless-stopped
-
   backend:
     build:
       context: ./backend
@@ -29,14 +23,12 @@ services:
       APP_ENV: production
       DEBUG: "false"
       NEO4J_URI: bolt://neo4j:7687
-      OLLAMA_BASE_URL: http://ollama:11434
     volumes:
       - upload_data:/app/uploads
       - log_data:/app/logs
     depends_on:
       - neo4j
       - redis
-      - ollama
     restart: unless-stopped
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
 
@@ -68,6 +60,5 @@ services:
 volumes:
   neo4j_data:
   redis_data:
-  ollama_data:
   upload_data:
   log_data:

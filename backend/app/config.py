@@ -51,9 +51,6 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.1
     llm_max_tokens: int = 4096
 
-    ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "qwen3"
-
     redis_url: str = "redis://localhost:6379/0"
     celery_enabled: bool = False
 
@@ -61,6 +58,7 @@ class Settings(BaseSettings):
 
     upload_dir: Path = Path("./uploads")
     max_upload_size_mb: int = 50
+    import_file_path: str = "./uploads/persons.xlsx"
 
     log_level: str = "INFO"
     log_dir: Path = Path("./logs")

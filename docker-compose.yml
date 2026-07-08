@@ -32,19 +32,6 @@ services:
       timeout: 5s
       retries: 3
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: eutridats-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   backend:
     build:
       context: ./backend
@@ -56,7 +43,6 @@ services:
       - ./backend/.env.example
     environment:
       NEO4J_URI: bolt://neo4j:7687
-      OLLAMA_BASE_URL: http://ollama:11434
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./backend:/app
@@ -83,6 +69,5 @@ volumes:
   neo4j_data:
   neo4j_logs:
   redis_data:
-  ollama_data:
   upload_data:
   log_data:

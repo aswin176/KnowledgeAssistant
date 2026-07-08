@@ -12,16 +12,16 @@ from app.infrastructure.neo4j.repository import Neo4jGraphRepository
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Import person Excel data into Neo4j")
-    parser.add_argument("file_path", nargs="?", default="./uploads/students.xlsx")
+    parser.add_argument("file_path", nargs="?", default=None)
     parser.add_argument("--sheet", type=int, default=0)
     parser.add_argument("--no-merge", action="store_true")
     args = parser.parse_args()
 
-    file_path = Path(args.file_path)
+    settings = get_settings()
+    file_path = Path(args.file_path or settings.import_file_path)
     if not file_path.exists():
         raise FileNotFoundError(f"Excel file not found: {file_path}")
 
-    settings = get_settings()
     conn = Neo4jConnection(settings)
     await conn.connect()
     repo = Neo4jGraphRepository(conn)

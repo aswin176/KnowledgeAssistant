@@ -12,7 +12,7 @@ It is designed to ingest person Excel data, build a graph schema, and then answe
 
 ## What changed in this version
 
-- Replaced the Ollama-only backend wiring with a Gemini-compatible LLM service.
+- Replaced the old local LLM wiring with a Gemini-compatible service.
 - Added a person-focused graph model for people, classes, companies, cities, addresses, family members, and spouse relationships.
 - Added an Excel import path that maps your provided columns into Neo4j nodes and relationships.
 - Added a backend script to load Excel files into Neo4j before starting the app.

@@ -332,7 +332,7 @@ async def get_settings_endpoint(
     _user: dict = Depends(get_current_user),
 ):
     return SettingsResponse(
-        ollama_model=container.settings.ollama_model,
+        llm_model=container.settings.gemini_model,
         neo4j_connected=await container.graph_repo.health_check(),
         llm_available=await container.llm.health_check(),
         supported_import_formats=container.import_service.supported_extensions,
