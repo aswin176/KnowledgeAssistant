@@ -14,8 +14,8 @@ class TestDomainEntities:
 
     def test_node_labels_complete(self):
         expected = {
-            "Student", "Person", "Company", "Skill", "City", "Country",
-            "Event", "Certification", "Project", "Technology", "Note",
+            "Person", "Company", "City", "Address", "Class",
+            "FamilyMember", "LinkedInProfile", "Note",
         }
         actual = {label.value for label in NodeLabel}
         assert expected.issubset(actual)

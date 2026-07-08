@@ -1,12 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GraphViewer } from "@/components/graph/graph-viewer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { api, type GraphNode, type GraphRelationship } from "@/lib/api";
+
+function getEntityHref(node: GraphNode): string {
+  const label = node._labels?.[0];
+
+  if (label === "Person") {
+    return `/person/${node.id}`;
+  }
+
+  if (label === "Company") {
+    return `/company/${node.id}`;
+  }
+
+  return `/graph?nodeId=${node.id}`;
+}
 
 export default function GraphPage() {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
@@ -15,6 +29,8 @@ export default function GraphPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedNodeId = searchParams.get("nodeId");
 
   const exploreNode = async (nodeId: string) => {
     setLoading(true);
@@ -46,12 +62,17 @@ export default function GraphPage() {
   };
 
   useEffect(() => {
+    if (requestedNodeId) {
+      void exploreNode(requestedNodeId);
+      return;
+    }
+
     api.listPersons(5).then((data) => {
       if (data.items[0]?.id) {
         void exploreNode(data.items[0].id);
       }
     });
-  }, []);
+  }, [requestedNodeId]);
 
   return (
     <DashboardLayout>
@@ -67,8 +88,8 @@ export default function GraphPage() {
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search entity..."
-              className="w-64"
+              placeholder="Search people, companies, classes, cities..."
+              className="w-72"
               onKeyDown={(event) => event.key === "Enter" && searchAndExplore()}
             />
             <Button onClick={searchAndExplore} disabled={loading}>
@@ -83,8 +104,11 @@ export default function GraphPage() {
               relationships={relationships}
               centerId={centerId}
               onNodeClick={(id) => {
+                const clickedNode = nodes.find((node) => node.id === id);
                 void exploreNode(id);
-                router.push(`/person/${id}`);
+                if (clickedNode) {
+                  router.push(getEntityHref(clickedNode));
+                }
               }}
             />
           ) : (

@@ -37,22 +37,25 @@ def test_excel_pipeline_maps_person_columns_to_graph_payload():
     record = records[0]
     assert record["roll_number"] == "2024001"
     assert record["name"] == "Asha Verma"
-    assert record["class"] == "BCA 2024"
-    assert record["father_name"] == "Ravi Verma"
     assert record["dob"] == "2002-05-11"
-    assert record["address"] == "123 Main Street"
-    assert record["hometown"] == "Jaipur"
     assert record["mobile"] == "9876543210"
     assert record["email"] == "asha@example.com"
-    assert record["current_employment"] == "Google"
     assert record["relationship_status"] == "Married"
-    assert record["marriage_date"] == "2024-07-01"
     assert record["kids"] == 1
-    assert record["spouse_roll_number"] == "2024002"
-    assert record["spouse_name"] == "Rahul Verma"
-    assert record["linkedin_url"] == "https://linkedin.com/in/asha"
-    assert record["current_city"] == "Bengaluru"
+    assert "class" not in record
+    assert "father_name" not in record
+    assert "address" not in record
+    assert "hometown" not in record
+    assert "current_employment" not in record
+    assert "marriage_date" not in record
+    assert "spouse_roll_number" not in record
+    assert "spouse_name" not in record
+    assert "linkedin_url" not in record
+    assert "current_city" not in record
     assert any(rel["type"] == "BELONGS_TO_CLASS" for rel in record["relationships"])
     assert any(rel["type"] == "WORKED_AT" for rel in record["relationships"])
     assert any(rel["type"] == "WORKS_AT" for rel in record["relationships"])
     assert any(rel["type"] == "MARRIED_TO" for rel in record["relationships"])
+    marriage_rel = next(rel for rel in record["relationships"] if rel["type"] == "MARRIED_TO")
+    assert marriage_rel["target_properties"]["roll_number"] == "2024002"
+    assert marriage_rel["properties"]["marriage_date"] == "2024-07-01"

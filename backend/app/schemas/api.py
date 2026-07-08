@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 
 # Auth
@@ -46,69 +46,35 @@ class SourceEntity(BaseModel):
 
 # Person
 class PersonCreate(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
     name: str
     roll_number: str | None = None
-    father_name: str | None = None
     dob: str | None = None
-    address: str | None = None
-    hometown: str | None = None
     mobile: str | None = None
     email: str | None = None
-    class_name: str | None = Field(default=None, alias="class")
-    current_employment: str | None = None
     relationship_status: str | None = None
-    marriage_date: str | None = None
     kids: int | None = None
-    spouse_roll_number: str | None = None
-    spouse_name: str | None = None
-    linkedin_url: str | None = None
-    current_city: str | None = None
     source: str = "manual"
 
 
 class PersonUpdate(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
     name: str | None = None
     roll_number: str | None = None
-    father_name: str | None = None
     dob: str | None = None
-    address: str | None = None
-    hometown: str | None = None
     mobile: str | None = None
     email: str | None = None
-    class_name: str | None = Field(default=None, alias="class")
-    current_employment: str | None = None
     relationship_status: str | None = None
-    marriage_date: str | None = None
     kids: int | None = None
-    spouse_roll_number: str | None = None
-    spouse_name: str | None = None
-    linkedin_url: str | None = None
-    current_city: str | None = None
 
 
 class PersonResponse(BaseModel):
     id: str
     name: str
     roll_number: str | None = None
-    father_name: str | None = None
     dob: str | None = None
-    address: str | None = None
-    hometown: str | None = None
     mobile: str | None = None
     email: str | None = None
-    class_name: str | None = Field(default=None, alias="class")
-    current_employment: str | None = None
     relationship_status: str | None = None
-    marriage_date: str | None = None
     kids: int | None = None
-    spouse_roll_number: str | None = None
-    spouse_name: str | None = None
-    linkedin_url: str | None = None
-    current_city: str | None = None
     created_at: str | None = None
     updated_at: str | None = None
     relationships: list[dict[str, Any]] = Field(default_factory=list)

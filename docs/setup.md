@@ -107,13 +107,33 @@ poetry run pytest tests/ --cov=app --cov-report=term-missing
 
 ## Importing Your Data
 
-1. Prepare a CSV with columns: `name`, `email`, `company`, `city`, `skills`, `title`
-2. Go to Import Data page or use the API:
+The person graph importer is aligned to `data/master.xlsx` and the following columns:
+
+- `Roll Number`
+- `Name`
+- `Class`
+- `Father Name`
+- `DOB`
+- `Address`
+- `Hometown`
+- `Mobile`
+- `Email`
+- `7th Semester Employment`
+- `10th Semester Employment`
+- `Current employment`
+- `Relationship Status`
+- `Marraige Date`
+- `Kids`
+- `Spouse Roll Number (if present in same data)`
+- `Spouse name`
+- `Linkedin URL`
+- `Current City`
+
+Run the import before starting normal usage:
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/upload \
-  -H "Authorization: Bearer $TOKEN" \
-  -F "file=@contacts.csv"
+cd backend
+poetry run python scripts/load_excel_to_neo4j.py ../data/master.xlsx
 ```
 
 Supported formats: `.csv`, `.xlsx`, `.json`, `.md`, `.pdf`, `.docx`

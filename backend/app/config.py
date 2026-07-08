@@ -58,7 +58,7 @@ class Settings(BaseSettings):
 
     upload_dir: Path = Path("./uploads")
     max_upload_size_mb: int = 50
-    import_file_path: str = "./uploads/persons.xlsx"
+    import_file_path: str = "../data/master.xlsx"
 
     log_level: str = "INFO"
     log_dir: Path = Path("./logs")

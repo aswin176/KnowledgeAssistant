@@ -37,8 +37,8 @@ export type SearchResponse = {
 export type PersonListItem = {
   id: string;
   name: string;
+  roll_number?: string;
   email?: string;
-  current_employment?: string;
   [key: string]: unknown;
 };
 
@@ -61,15 +61,12 @@ export type RelationshipSummary = {
 export type PersonDetail = {
   id: string;
   name: string;
+  roll_number?: string;
+  dob?: string;
   email?: string;
   mobile?: string;
-  linkedin_url?: string;
   relationship_status?: string;
-  current_employment?: string;
-  current_city?: string;
-  spouse_name?: string;
   kids?: number;
-  bio?: string;
   relationships?: RelationshipSummary[];
   [key: string]: unknown;
 };

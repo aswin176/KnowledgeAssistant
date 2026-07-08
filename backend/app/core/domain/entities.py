@@ -9,7 +9,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class NodeLabel(str, Enum):
-    STUDENT = "Student"
     PERSON = "Person"
     COMPANY = "Company"
     SKILL = "Skill"
@@ -80,21 +79,11 @@ class PersonEntity(MetadataMixin):
 
     name: str
     roll_number: str | None = None
-    father_name: str | None = None
     dob: str | None = None
-    address: str | None = None
-    hometown: str | None = None
     mobile: str | None = None
     email: str | None = None
-    class_name: str | None = Field(default=None, alias="class")
-    current_employment: str | None = None
     relationship_status: str | None = None
-    marriage_date: str | None = None
     kids: int | None = None
-    spouse_roll_number: str | None = None
-    spouse_name: str | None = None
-    linkedin_url: str | None = None
-    current_city: str | None = None
 
 
 class CompanyEntity(MetadataMixin):

@@ -59,8 +59,8 @@ export function ChatInterface() {
   const suggestions = [
     "Who works at Google?",
     "Which classmates live in Bangalore?",
-    "Who has AWS certification?",
-    "Show everyone married with children.",
+    "Who is married to whom?",
+    "Show everyone with children.",
   ];
 
   return (
@@ -110,7 +110,7 @@ export function ChatInterface() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about people, companies, skills..."
+            placeholder="Ask about people, companies, classes, cities..."
             disabled={loading}
             className="flex-1"
           />

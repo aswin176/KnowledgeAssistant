@@ -8,6 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { api, type SearchResult } from "@/lib/api";
 
+function getResultHref(result: SearchResult): string {
+  if (!result.id) {
+    return "#";
+  }
+
+  const label = result._labels?.[0];
+  if (label === "Person") {
+    return `/person/${result.id}`;
+  }
+
+  if (label === "Company") {
+    return `/company/${result.id}`;
+  }
+
+  return `/graph?nodeId=${result.id}`;
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState("hybrid");
@@ -38,13 +55,13 @@ export default function SearchPage() {
         <div className="flex max-w-2xl gap-2">
           <Input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search people, companies, skills..."
-            onKeyDown={(e) => e.key === "Enter" && search()}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search people, companies, classes, cities..."
+            onKeyDown={(event) => event.key === "Enter" && search()}
           />
           <select
             value={mode}
-            onChange={(e) => setMode(e.target.value)}
+            onChange={(event) => setMode(event.target.value)}
             className="rounded-md border border-border bg-background px-3 text-sm"
           >
             <option value="hybrid">Hybrid</option>
@@ -61,10 +78,7 @@ export default function SearchPage() {
             <Card key={index}>
               <CardContent className="flex items-center justify-between p-4">
                 <div>
-                  <Link
-                    href={result.id ? `/person/${result.id}` : "#"}
-                    className="font-medium hover:text-primary"
-                  >
+                  <Link href={getResultHref(result)} className="font-medium hover:text-primary">
                     {result.name ?? "Unknown"}
                   </Link>
                   <p className="text-sm text-muted-foreground">

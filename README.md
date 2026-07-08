@@ -8,7 +8,7 @@ This project is a person knowledge-graph assistant built around a Gemini-powered
 - LangGraph agent → Gemini 2.5 Flash API
 - Gemini/agent layer → Neo4j knowledge graph
 
-It is designed to ingest person Excel data, build a graph schema, and then answer natural-language questions about people, classes, careers, cities, spouses, and employment history.
+It is designed to ingest person Excel data, build a graph schema, and then answer natural-language questions about people, classes, cities, spouses, and employment history.
 
 ## What changed in this version
 
@@ -45,13 +45,15 @@ The importer is configured for the following person columns:
 The importer creates graph data using these concepts:
 
 - Person node for each record
+- Person attributes kept on the node: `roll_number`, `name`, `dob`, `mobile`, `email`, `relationship_status`, `kids`
 - Class node via BELONGS_TO_CLASS
 - Company nodes for employment history via WORKED_AT / WORKS_AT
 - City nodes for hometown and current city via LIVES_IN
 - Address node via LIVES_AT
 - Family member node via HAS_FATHER
-- Spouse relationship via MARRIED_TO
+- Spouse relationship via MARRIED_TO, with `marriage_date` stored on the edge
 - LinkedIn profile relationship via HAS_PROFILE
+- Extra Excel columns outside the supported list are ignored during import
 
 ## Recommended setup
 
@@ -76,13 +78,13 @@ Run the import script first so the graph schema and nodes exist before starting 
 
 ```bash
 cd backend
-python scripts/load_excel_to_neo4j.py path/to/persons.xlsx
+python scripts/load_excel_to_neo4j.py ../data/master.xlsx
 ```
 
 If your workbook has multiple sheets, use:
 
 ```bash
-python scripts/load_excel_to_neo4j.py path/to/persons.xlsx --sheet 0
+python scripts/load_excel_to_neo4j.py ../data/master.xlsx --sheet 0
 ```
 
 ### 3. Start the backend

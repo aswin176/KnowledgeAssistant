@@ -45,8 +45,8 @@ export default function PersonDetailPage() {
             Back to People
           </Link>
           <h1 className="mt-2 text-2xl font-semibold">{person.name ?? "Unnamed person"}</h1>
-          {person.current_employment && (
-            <p className="text-muted-foreground">{person.current_employment}</p>
+          {person.roll_number && (
+            <p className="text-muted-foreground">Roll Number: {person.roll_number}</p>
           )}
         </div>
 
@@ -66,17 +66,9 @@ export default function PersonDetailPage() {
                   <span className="font-medium">Mobile:</span> {person.mobile}
                 </p>
               )}
-              {person.linkedin_url && (
+              {person.dob && (
                 <p>
-                  <span className="font-medium">LinkedIn:</span>{" "}
-                  <a
-                    href={person.linkedin_url}
-                    className="text-primary hover:underline"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    {person.linkedin_url}
-                  </a>
+                  <span className="font-medium">DOB:</span> {person.dob}
                 </p>
               )}
               {person.relationship_status && (
@@ -84,22 +76,11 @@ export default function PersonDetailPage() {
                   <span className="font-medium">Status:</span> {person.relationship_status}
                 </p>
               )}
-              {person.current_city && (
-                <p>
-                  <span className="font-medium">Current city:</span> {person.current_city}
-                </p>
-              )}
-              {person.spouse_name && (
-                <p>
-                  <span className="font-medium">Spouse:</span> {person.spouse_name}
-                </p>
-              )}
               {typeof person.kids === "number" && (
                 <p>
                   <span className="font-medium">Kids:</span> {person.kids}
                 </p>
               )}
-              {person.bio && <p className="mt-4 text-muted-foreground">{person.bio}</p>}
             </CardContent>
           </Card>
 

@@ -23,8 +23,8 @@ export default function PersonListPage() {
               <Card className="cursor-pointer transition-colors hover:border-primary">
                 <CardContent className="p-4">
                   <h3 className="font-medium">{person.name}</h3>
-                  {person.current_employment && (
-                    <p className="text-sm text-muted-foreground">{person.current_employment}</p>
+                  {person.roll_number && (
+                    <p className="text-sm text-muted-foreground">Roll No: {person.roll_number}</p>
                   )}
                   {person.email && (
                     <p className="mt-1 text-xs text-muted-foreground">{person.email}</p>

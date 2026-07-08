@@ -13,12 +13,12 @@ interface GraphViewerProps {
 
 const LABEL_COLORS: Record<string, string> = {
   Person: "#3b82f6",
-  Student: "#8b5cf6",
   Company: "#10b981",
-  Skill: "#f59e0b",
+  Class: "#f59e0b",
   City: "#ef4444",
-  Event: "#ec4899",
-  Certification: "#06b6d4",
+  Address: "#14b8a6",
+  FamilyMember: "#f97316",
+  LinkedInProfile: "#0a66c2",
   default: "#6b7280",
 };
 
@@ -32,6 +32,18 @@ export function GraphViewer({ nodes, relationships, centerId, onNodeClick }: Gra
     const visNodes = nodes.map((n) => {
       const label = n._labels?.[0] ?? "default";
       const color = LABEL_COLORS[label] ?? LABEL_COLORS.default;
+      const shape =
+        label === "Company"
+          ? ("box" as const)
+          : label === "Class"
+            ? ("hexagon" as const)
+            : label === "City"
+              ? ("diamond" as const)
+              : label === "Address"
+                ? ("box" as const)
+                : label === "LinkedInProfile"
+                  ? ("database" as const)
+                  : ("dot" as const);
       return {
         id: n.id,
         label: n.name ?? n.id.slice(0, 8),
@@ -41,7 +53,7 @@ export function GraphViewer({ nodes, relationships, centerId, onNodeClick }: Gra
         },
         borderWidth: centerId === n.id ? 3 : 1,
         font: { color: "#e5e7eb", size: 14 },
-        shape: label === "Company" ? ("box" as const) : ("dot" as const),
+        shape,
         size: centerId === n.id ? 25 : 18,
       };
     });

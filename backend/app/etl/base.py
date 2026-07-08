@@ -126,13 +126,23 @@ class BaseETLPipeline(ABC):
         rel_type = RelationshipType(rel_spec["type"])
         target_label = NodeLabel(rel_spec.get("target_label", NodeLabel.COMPANY.value))
         target_name = rel_spec.get("target_name", "")
+        target_properties = {
+            "source": source_node.get("source", "import"),
+            **rel_spec.get("target_properties", {}),
+        }
+        if target_name and not target_properties.get("name"):
+            target_properties["name"] = target_name
+        merge_keys = rel_spec.get("target_merge_keys", ["name"])
+
+        if not target_name:
+            target_name = str(target_properties.get("name", "")).strip()
         if not target_name:
             return
 
         target = await self._graph.create_node(
             label=target_label,
-            properties={"name": target_name, "source": source_node.get("source", "import")},
-            merge_keys=["name"],
+            properties=target_properties,
+            merge_keys=merge_keys,
         )
 
         await self._graph.create_relationship(

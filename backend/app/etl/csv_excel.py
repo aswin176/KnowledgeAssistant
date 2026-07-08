@@ -31,73 +31,166 @@ COLUMN_MAPPINGS = {
     "current_city": "current_city",
 }
 
+PERSON_ATTRIBUTE_KEYS = {
+    "roll_number",
+    "name",
+    "dob",
+    "mobile",
+    "email",
+    "relationship_status",
+    "kids",
+}
+
+RELATIONSHIP_SOURCE_KEYS = {
+    "class",
+    "father_name",
+    "address",
+    "hometown",
+    "current_city",
+    "7th_semester_employment",
+    "10th_semester_employment",
+    "current_employment",
+    "marriage_date",
+    "spouse_roll_number",
+    "spouse_name",
+    "linkedin_url",
+}
+
+SUPPORTED_PERSON_COLUMNS = PERSON_ATTRIBUTE_KEYS | RELATIONSHIP_SOURCE_KEYS
+
 
 def _normalize_column_name(col: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", str(col).strip().lower()).strip("_")
 
 
-def _parse_skills(value: Any) -> list[dict[str, Any]]:
-    if not value or (isinstance(value, float) and pd.isna(value)):
-        return []
-    skills_str = str(value)
-    skills = [s.strip() for s in skills_str.replace(";", ",").split(",") if s.strip()]
-    return [{"type": "HAS_SKILL", "target_label": "Skill", "target_name": s} for s in skills]
+def _clean_value(value: Any) -> Any:
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return None
+    if isinstance(value, str):
+        cleaned = value.strip()
+        return cleaned or None
+    return value
 
 
-def _parse_company(value: Any) -> list[dict[str, Any]]:
-    if not value or (isinstance(value, float) and pd.isna(value)):
-        return []
-    return [{"type": "WORKS_AT", "target_label": "Company", "target_name": str(value).strip()}]
+def _clean_string(value: Any) -> str | None:
+    cleaned = _clean_value(value)
+    if cleaned is None:
+        return None
+    return str(cleaned).strip() or None
 
 
-def _parse_city(value: Any) -> list[dict[str, Any]]:
-    if not value or (isinstance(value, float) and pd.isna(value)):
-        return []
-    return [{"type": "LIVES_IN", "target_label": "City", "target_name": str(value).strip()}]
+def _clean_integer(value: Any) -> int | None:
+    cleaned = _clean_value(value)
+    if cleaned is None:
+        return None
+    if isinstance(cleaned, int):
+        return cleaned
+    if isinstance(cleaned, float):
+        return int(cleaned)
+    text = str(cleaned).strip()
+    if not text:
+        return None
+    return int(float(text))
 
 
 def _parse_person_relationships(record: dict[str, Any]) -> list[dict[str, Any]]:
     relationships: list[dict[str, Any]] = []
 
+    def add_relationship(
+        rel_type: str,
+        target_label: str,
+        target_name: str | None,
+        *,
+        properties: dict[str, Any] | None = None,
+        target_properties: dict[str, Any] | None = None,
+        target_merge_keys: list[str] | None = None,
+    ) -> None:
+        if not target_name:
+            return
+        relationship: dict[str, Any] = {
+            "type": rel_type,
+            "target_label": target_label,
+            "target_name": target_name,
+        }
+        if properties:
+            relationship["properties"] = properties
+        if target_properties:
+            relationship["target_properties"] = target_properties
+        if target_merge_keys:
+            relationship["target_merge_keys"] = target_merge_keys
+        relationships.append(relationship)
+
     if record.get("class"):
-        relationships.append(
-            {"type": "BELONGS_TO_CLASS", "target_label": "Class", "target_name": str(record["class"]).strip()}
-        )
+        add_relationship("BELONGS_TO_CLASS", "Class", _clean_string(record["class"]))
     if record.get("current_city"):
-        relationships.append(
-            {"type": "LIVES_IN", "target_label": "City", "target_name": str(record["current_city"]).strip()}
+        add_relationship(
+            "LIVES_IN",
+            "City",
+            _clean_string(record["current_city"]),
+            properties={"kind": "current_city"},
         )
     if record.get("hometown"):
-        relationships.append(
-            {"type": "LIVES_IN", "target_label": "City", "target_name": str(record["hometown"]).strip()}
+        add_relationship(
+            "LIVES_IN",
+            "City",
+            _clean_string(record["hometown"]),
+            properties={"kind": "hometown"},
         )
     if record.get("address"):
-        relationships.append(
-            {"type": "LIVES_AT", "target_label": "Address", "target_name": str(record["address"]).strip()}
-        )
+        add_relationship("LIVES_AT", "Address", _clean_string(record["address"]))
     if record.get("father_name"):
-        relationships.append(
-            {"type": "HAS_FATHER", "target_label": "FamilyMember", "target_name": str(record["father_name"]).strip()}
-        )
-    if record.get("spouse_name"):
-        relationships.append(
-            {"type": "MARRIED_TO", "target_label": "Person", "target_name": str(record["spouse_name"]).strip()}
+        add_relationship("HAS_FATHER", "FamilyMember", _clean_string(record["father_name"]))
+    if record.get("spouse_name") or record.get("spouse_roll_number"):
+        spouse_name = _clean_string(record.get("spouse_name"))
+        spouse_roll_number = _clean_string(record.get("spouse_roll_number"))
+        spouse_properties = {
+            "name": spouse_name or f"Spouse {spouse_roll_number}",
+        }
+        if spouse_roll_number:
+            spouse_properties["roll_number"] = spouse_roll_number
+        marriage_properties = {
+            "marriage_date": _clean_string(record.get("marriage_date")),
+        }
+        marriage_properties = {
+            key: value for key, value in marriage_properties.items() if value is not None
+        }
+        add_relationship(
+            "MARRIED_TO",
+            "Person",
+            spouse_properties["name"],
+            properties=marriage_properties or None,
+            target_properties=spouse_properties,
+            target_merge_keys=["roll_number"] if spouse_roll_number else ["name"],
         )
     if record.get("7th_semester_employment"):
-        relationships.append(
-            {"type": "WORKED_AT", "target_label": "Company", "target_name": str(record["7th_semester_employment"]).strip()}
+        add_relationship(
+            "WORKED_AT",
+            "Company",
+            _clean_string(record["7th_semester_employment"]),
+            properties={"stage": "7th_semester"},
         )
     if record.get("10th_semester_employment"):
-        relationships.append(
-            {"type": "WORKED_AT", "target_label": "Company", "target_name": str(record["10th_semester_employment"]).strip()}
+        add_relationship(
+            "WORKED_AT",
+            "Company",
+            _clean_string(record["10th_semester_employment"]),
+            properties={"stage": "10th_semester"},
         )
     if record.get("current_employment"):
-        relationships.append(
-            {"type": "WORKS_AT", "target_label": "Company", "target_name": str(record["current_employment"]).strip()}
+        add_relationship(
+            "WORKS_AT",
+            "Company",
+            _clean_string(record["current_employment"]),
+            properties={"stage": "current"},
         )
     if record.get("linkedin_url"):
-        relationships.append(
-            {"type": "HAS_PROFILE", "target_label": "LinkedInProfile", "target_name": str(record["linkedin_url"]).strip()}
+        linkedin_url = _clean_string(record["linkedin_url"])
+        add_relationship(
+            "HAS_PROFILE",
+            "LinkedInProfile",
+            linkedin_url,
+            target_properties={"name": linkedin_url, "url": linkedin_url},
+            target_merge_keys=["url"],
         )
     return relationships
 
@@ -109,25 +202,29 @@ class TabularMixin:
         records: list[dict[str, Any]] = []
 
         for _, row in df.iterrows():
-            record: dict[str, Any] = {"relationships": []}
+            normalized_row: dict[str, Any] = {}
             for col, val in row.items():
-                if pd.isna(val):
+                if col not in SUPPORTED_PERSON_COLUMNS:
                     continue
-                if col == "skills":
-                    record["relationships"].extend(_parse_skills(val))
-                elif col == "company":
-                    record["relationships"].extend(_parse_company(val))
-                elif col == "city":
-                    record["relationships"].extend(_parse_city(val))
-                elif col == "label":
-                    record["label"] = str(val)
-                else:
-                    record[col] = val
+                cleaned = _clean_integer(val) if col == "kids" else _clean_value(val)
+                if cleaned is None:
+                    continue
+                normalized_row[col] = cleaned
 
-            if record.get("name"):
+            if normalized_row.get("name"):
+                record: dict[str, Any] = {
+                    "relationships": _parse_person_relationships(normalized_row),
+                }
+                for key in PERSON_ATTRIBUTE_KEYS:
+                    if key in normalized_row:
+                        record[key] = normalized_row[key]
                 record["label"] = "Person"
-                record["merge_keys"] = ["roll_number"] if record.get("roll_number") else ["email", "name"]
-                record["relationships"].extend(_parse_person_relationships(record))
+                if record.get("roll_number"):
+                    record["merge_keys"] = ["roll_number"]
+                elif record.get("email"):
+                    record["merge_keys"] = ["email"]
+                else:
+                    record["merge_keys"] = ["name"]
                 records.append(record)
 
         return records
