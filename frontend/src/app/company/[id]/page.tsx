@@ -17,7 +17,7 @@ type CompanyDetail = {
 
 export default function CompanyDetailPage() {
   const params = useParams();
-  const id = params.id as string;
+  const id = typeof params.id === "string" ? params.id : "";
   const [company, setCompany] = useState<CompanyDetail | null>(null);
 
   useEffect(() => {

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { Network } from "vis-network";
-import { DataSet } from "vis-data";
 
 interface GraphNode {
   id: string;
@@ -41,36 +40,32 @@ export function GraphViewer({ nodes, relationships, centerId, onNodeClick }: Gra
   useEffect(() => {
     if (!containerRef.current || nodes.length === 0) return;
 
-    const visNodes = new DataSet(
-      nodes.map((n) => {
-        const label = n._labels?.[0] || "default";
-        return {
-          id: n.id,
-          label: n.name || n.id.slice(0, 8),
-          color: {
-            background: LABEL_COLORS[label] || LABEL_COLORS.default,
-            border: centerId === n.id ? "#ffffff" : LABEL_COLORS[label] || LABEL_COLORS.default,
-          },
-          borderWidth: centerId === n.id ? 3 : 1,
-          font: { color: "#e5e7eb", size: 14 },
-          shape: label === "Company" ? "box" : "dot",
-          size: centerId === n.id ? 25 : 18,
-        };
-      })
-    );
+    const visNodes = nodes.map((n) => {
+      const label = n._labels?.[0] || "default";
+      return {
+        id: n.id,
+        label: n.name || n.id.slice(0, 8),
+        color: {
+          background: LABEL_COLORS[label] || LABEL_COLORS.default,
+          border: centerId === n.id ? "#ffffff" : LABEL_COLORS[label] || LABEL_COLORS.default,
+        },
+        borderWidth: centerId === n.id ? 3 : 1,
+        font: { color: "#e5e7eb", size: 14 },
+        shape: label === "Company" ? "box" : "dot",
+        size: centerId === n.id ? 25 : 18,
+      };
+    });
 
-    const visEdges = new DataSet(
-      relationships.map((r, i) => ({
-        id: i,
-        from: r.start,
-        to: r.end,
-        label: r.type,
-        arrows: "to",
-        color: { color: "#4b5563", highlight: "#9ca3af" },
-        font: { color: "#9ca3af", size: 10, align: "middle" },
-        smooth: { type: "curvedCW", roundness: 0.2 },
-      }))
-    );
+    const visEdges = relationships.map((r, i) => ({
+      id: i,
+      from: r.start,
+      to: r.end,
+      label: r.type,
+      arrows: "to",
+      color: { color: "#4b5563", highlight: "#9ca3af" },
+      font: { color: "#9ca3af", size: 10, align: "middle" },
+      smooth: { type: "curvedCW", roundness: 0.2 },
+    }));
 
     const network = new Network(
       containerRef.current,

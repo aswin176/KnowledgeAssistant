@@ -28,7 +28,7 @@ type GraphData = {
 
 export default function PersonDetailPage() {
   const params = useParams();
-  const id = params.id as string;
+  const id = typeof params.id === "string" ? params.id : "";
   const [person, setPerson] = useState<PersonDetail | null>(null);
   const [relationships, setRelationships] = useState<Array<{ type?: string; node?: { name?: string } }>>([]);
   const [graph, setGraph] = useState<GraphData | null>(null);

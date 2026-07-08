@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/utils";
 import { Sidebar } from "./sidebar";
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
