@@ -2,7 +2,13 @@
 
 import argparse
 import asyncio
+import sys
 from pathlib import Path
+
+# Ensure backend root is available on sys.path when running this script directly.
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from app.config import get_settings
 from app.etl.csv_excel import ExcelETLPipeline
