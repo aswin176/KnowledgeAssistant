@@ -27,28 +27,28 @@ export default function ImportPage() {
   const [history, setHistory] = useState<ImportHistoryItem[]>([]);
 
   const loadHistory = () => {
-    api.listImports().then((data) => setHistory(data.items || []));
+    api.listImports().then((data) => setHistory(data.items ?? []));
   };
 
   const handleFile = async (file: File) => {
     setLoading(true);
     setResult(null);
     try {
-      const res = await api.uploadFile(file);
-      setResult(res);
+      const response = await api.uploadFile(file);
+      setResult(response);
       loadHistory();
-    } catch (err) {
-      setResult({ status: "failed", errors: [String(err)] });
+    } catch (error) {
+      setResult({ status: "failed", errors: [String(error)] });
     } finally {
       setLoading(false);
     }
   };
 
-  const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
+  const onDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    const file = event.dataTransfer.files[0];
+    if (file) void handleFile(file);
   }, []);
 
   return (
@@ -56,27 +56,36 @@ export default function ImportPage() {
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Import Data</h1>
-          <p className="text-muted-foreground">Upload CSV, Excel, JSON, Markdown, PDF, or Word files</p>
+          <p className="text-muted-foreground">
+            Upload CSV, Excel, JSON, Markdown, PDF, or Word files
+          </p>
         </div>
 
         <Card
           className={`border-2 border-dashed transition-colors ${dragging ? "border-primary bg-primary/5" : "border-border"}`}
-          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
         >
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Upload className="h-12 w-12 text-muted-foreground mb-4" />
+            <Upload className="mb-4 h-12 w-12 text-muted-foreground" />
             <p className="text-lg font-medium">Drop files here or click to upload</p>
-            <p className="text-sm text-muted-foreground mt-1">CSV, XLSX, JSON, MD, PDF, DOCX</p>
+            <p className="mt-1 text-sm text-muted-foreground">CSV, XLSX, JSON, MD, PDF, DOCX</p>
             <input
               type="file"
               className="hidden"
               id="file-upload"
               accept=".csv,.xlsx,.xls,.json,.md,.markdown,.pdf,.docx"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+              onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])}
             />
-            <Button className="mt-4" onClick={() => document.getElementById("file-upload")?.click()} disabled={loading}>
+            <Button
+              className="mt-4"
+              onClick={() => document.getElementById("file-upload")?.click()}
+              disabled={loading}
+            >
               {loading ? "Importing..." : "Select File"}
             </Button>
           </CardContent>
@@ -84,16 +93,17 @@ export default function ImportPage() {
 
         {result && (
           <Card>
-            <CardContent className="p-4 flex items-start gap-3">
+            <CardContent className="flex items-start gap-3 p-4">
               {result.status === "completed" ? (
-                <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                <CheckCircle className="mt-0.5 h-5 w-5 text-green-500" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+                <AlertCircle className="mt-0.5 h-5 w-5 text-destructive" />
               )}
               <div>
                 <p className="font-medium">Import {result.status ?? "unknown"}</p>
                 <p className="text-sm text-muted-foreground">
-                  Processed: {result.records_processed ?? 0} · Created: {result.records_created ?? 0} · Merged: {result.records_merged ?? 0}
+                  Processed: {result.records_processed ?? 0} - Created:{" "}
+                  {result.records_created ?? 0} - Merged: {result.records_merged ?? 0}
                 </p>
               </div>
             </CardContent>
@@ -112,8 +122,8 @@ export default function ImportPage() {
               Refresh
             </Button>
             <div className="space-y-2">
-              {history.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm border-b border-border pb-2">
+              {history.map((item, index) => (
+                <div key={index} className="flex justify-between border-b border-border pb-2 text-sm">
                   <span>{item.filename ?? "Unnamed import"}</span>
                   <span className="text-muted-foreground">{item.status ?? "unknown"}</span>
                 </div>

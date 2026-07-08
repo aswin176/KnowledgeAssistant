@@ -2,22 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { Network } from "vis-network";
-
-interface GraphNode {
-  id: string;
-  name?: string;
-  _labels?: string[];
-}
-
-interface GraphEdge {
-  type: string;
-  start?: string;
-  end?: string;
-}
+import type { GraphNode, GraphRelationship } from "@/lib/api";
 
 interface GraphViewerProps {
   nodes: GraphNode[];
-  relationships: GraphEdge[];
+  relationships: GraphRelationship[];
   centerId?: string;
   onNodeClick?: (nodeId: string) => void;
 }
@@ -41,30 +30,31 @@ export function GraphViewer({ nodes, relationships, centerId, onNodeClick }: Gra
     if (!containerRef.current || nodes.length === 0) return;
 
     const visNodes = nodes.map((n) => {
-      const label = n._labels?.[0] || "default";
+      const label = n._labels?.[0] ?? "default";
+      const color = LABEL_COLORS[label] ?? LABEL_COLORS.default;
       return {
         id: n.id,
-        label: n.name || n.id.slice(0, 8),
+        label: n.name ?? n.id.slice(0, 8),
         color: {
-          background: LABEL_COLORS[label] || LABEL_COLORS.default,
-          border: centerId === n.id ? "#ffffff" : LABEL_COLORS[label] || LABEL_COLORS.default,
+          background: color,
+          border: centerId === n.id ? "#ffffff" : color,
         },
         borderWidth: centerId === n.id ? 3 : 1,
         font: { color: "#e5e7eb", size: 14 },
-        shape: label === "Company" ? "box" : "dot",
+        shape: label === "Company" ? ("box" as const) : ("dot" as const),
         size: centerId === n.id ? 25 : 18,
       };
     });
 
     const visEdges = relationships.map((r, i) => ({
-      id: i,
+      id: `${r.type}-${i}`,
       from: r.start,
       to: r.end,
       label: r.type,
-      arrows: "to",
+      arrows: "to" as const,
       color: { color: "#4b5563", highlight: "#9ca3af" },
-      font: { color: "#9ca3af", size: 10, align: "middle" },
-      smooth: { type: "curvedCW", roundness: 0.2 },
+      font: { color: "#9ca3af", size: 10, align: "middle" as const },
+      smooth: { type: "curvedCW" as const, roundness: 0.2 },
     }));
 
     const network = new Network(

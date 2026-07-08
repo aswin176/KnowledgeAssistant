@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Link from "next/link";
 
 interface Source {
   id?: string;
@@ -30,7 +30,7 @@ export function ChatMessage({ role, content, sources }: ChatMessageProps) {
       </div>
       <div className="flex-1 space-y-2 overflow-hidden">
         <p className="text-xs font-medium text-muted-foreground">{isUser ? "You" : "Eutridats"}</p>
-        <div className="markdown-body prose prose-sm dark:prose-invert max-w-none">
+        <div className="markdown-body prose prose-sm max-w-none dark:prose-invert">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
         </div>
         {sources && sources.length > 0 && (
@@ -39,13 +39,13 @@ export function ChatMessage({ role, content, sources }: ChatMessageProps) {
               Sources ({sources.length})
             </summary>
             <div className="mt-2 flex flex-wrap gap-2">
-              {sources.map((source, i) => (
+              {sources.map((source, index) => (
                 <Link
-                  key={i}
+                  key={index}
                   href={source.id ? `/person/${source.id}` : "#"}
                   className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20"
                 >
-                  {source.name || "Unknown"} · {source.type}
+                  {source.name ?? "Unknown"} - {source.type ?? "Unknown"}
                 </Link>
               ))}
             </div>

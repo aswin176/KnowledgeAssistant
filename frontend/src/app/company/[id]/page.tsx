@@ -5,15 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/lib/api";
-
-type CompanyDetail = {
-  id?: string;
-  name?: string;
-  industry?: string;
-  website?: string;
-  description?: string;
-};
+import { api, type CompanyDetail } from "@/lib/api";
 
 export default function CompanyDetailPage() {
   const params = useParams();
@@ -37,20 +29,29 @@ export default function CompanyDetailPage() {
       <div className="p-6 space-y-6">
         <div>
           <Link href="/company" className="text-sm text-muted-foreground hover:text-primary">
-            ← Back to Companies
+            Back to Companies
           </Link>
-          <h1 className="text-2xl font-semibold mt-2">{company.name ?? "Unnamed company"}</h1>
+          <h1 className="mt-2 text-2xl font-semibold">{company.name ?? "Unnamed company"}</h1>
         </div>
         <Card>
           <CardHeader>
             <CardTitle>Company Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {company.industry && <p><span className="font-medium">Industry:</span> {company.industry}</p>}
+            {company.industry && (
+              <p>
+                <span className="font-medium">Industry:</span> {company.industry}
+              </p>
+            )}
             {company.website && (
               <p>
                 <span className="font-medium">Website:</span>{" "}
-                <a href={company.website} className="text-primary hover:underline" target="_blank" rel="noopener">
+                <a
+                  href={company.website}
+                  className="text-primary hover:underline"
+                  target="_blank"
+                  rel="noopener"
+                >
                   {company.website}
                 </a>
               </p>

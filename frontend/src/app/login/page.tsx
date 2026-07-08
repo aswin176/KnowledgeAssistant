@@ -16,8 +16,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
     setError("");
     try {
@@ -47,7 +47,7 @@ export default function LoginPage() {
               <label className="text-sm font-medium">Username</label>
               <Input
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(event) => setUsername(event.target.value)}
                 placeholder="admin"
                 required
               />
@@ -57,8 +57,8 @@ export default function LoginPage() {
               <Input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="********"
                 required
               />
             </div>

@@ -6,11 +6,11 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { GraphViewer } from "@/components/graph/graph-viewer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { api, type GraphNode, type GraphRelationship } from "@/lib/api";
 
 export default function GraphPage() {
-  const [nodes, setNodes] = useState<{ id: string; name?: string; _labels?: string[] }[]>([]);
-  const [relationships, setRelationships] = useState<{ type: string; start?: string; end?: string }[]>([]);
+  const [nodes, setNodes] = useState<GraphNode[]>([]);
+  const [relationships, setRelationships] = useState<GraphRelationship[]>([]);
   const [centerId, setCenterId] = useState<string>();
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function GraphPage() {
       setRelationships(data.relationships);
       setCenterId(data.center_id);
     } catch {
-      /* ignore */
+      // Ignore failed graph expansions and keep the previous graph visible.
     } finally {
       setLoading(false);
     }
@@ -35,11 +35,11 @@ export default function GraphPage() {
     setLoading(true);
     try {
       const results = await api.search(searchQuery, "hybrid", 1);
-      if (results.results?.[0]?.id) {
+      if (results.results[0]?.id) {
         await exploreNode(results.results[0].id);
       }
     } catch {
-      /* ignore */
+      // Ignore failed searches and keep the page responsive.
     } finally {
       setLoading(false);
     }
@@ -47,8 +47,8 @@ export default function GraphPage() {
 
   useEffect(() => {
     api.listPersons(5).then((data) => {
-      if (data.items?.[0]?.id) {
-        exploreNode(data.items[0].id);
+      if (data.items[0]?.id) {
+        void exploreNode(data.items[0].id);
       }
     });
   }, []);
@@ -59,15 +59,17 @@ export default function GraphPage() {
         <div className="flex items-center gap-4 border-b border-border px-6 py-4">
           <div>
             <h1 className="text-xl font-semibold">Graph Explorer</h1>
-            <p className="text-sm text-muted-foreground">Interactive knowledge graph visualization</p>
+            <p className="text-sm text-muted-foreground">
+              Interactive knowledge graph visualization
+            </p>
           </div>
           <div className="ml-auto flex gap-2">
             <Input
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search entity..."
               className="w-64"
-              onKeyDown={(e) => e.key === "Enter" && searchAndExplore()}
+              onKeyDown={(event) => event.key === "Enter" && searchAndExplore()}
             />
             <Button onClick={searchAndExplore} disabled={loading}>
               Explore
@@ -81,7 +83,7 @@ export default function GraphPage() {
               relationships={relationships}
               centerId={centerId}
               onNodeClick={(id) => {
-                exploreNode(id);
+                void exploreNode(id);
                 router.push(`/person/${id}`);
               }}
             />

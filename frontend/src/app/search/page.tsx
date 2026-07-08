@@ -6,12 +6,12 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { api } from "@/lib/api";
+import { api, type SearchResult } from "@/lib/api";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState("hybrid");
-  const [results, setResults] = useState<{ id?: string; name?: string; _labels?: string[]; score?: number }[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   const search = async () => {
@@ -19,7 +19,7 @@ export default function SearchPage() {
     setLoading(true);
     try {
       const data = await api.search(query, mode);
-      setResults(data.results || []);
+      setResults(data.results ?? []);
     } catch {
       setResults([]);
     } finally {
@@ -35,7 +35,7 @@ export default function SearchPage() {
           <p className="text-muted-foreground">Graph, full-text, and hybrid search</p>
         </div>
 
-        <div className="flex gap-2 max-w-2xl">
+        <div className="flex max-w-2xl gap-2">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -57,18 +57,18 @@ export default function SearchPage() {
         </div>
 
         <div className="grid gap-3">
-          {results.map((r, i) => (
-            <Card key={i}>
+          {results.map((result, index) => (
+            <Card key={index}>
               <CardContent className="flex items-center justify-between p-4">
                 <div>
                   <Link
-                    href={r.id ? `/person/${r.id}` : "#"}
+                    href={result.id ? `/person/${result.id}` : "#"}
                     className="font-medium hover:text-primary"
                   >
-                    {r.name || "Unknown"}
+                    {result.name ?? "Unknown"}
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    {(r._labels || []).join(", ")} · Score: {(r.score || 0).toFixed(2)}
+                    {(result._labels ?? []).join(", ")} - Score: {(result.score ?? 0).toFixed(2)}
                   </p>
                 </div>
               </CardContent>
