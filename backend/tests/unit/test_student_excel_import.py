@@ -39,6 +39,18 @@ def test_excel_pipeline_maps_person_columns_to_graph_payload():
     assert record["name"] == "Asha Verma"
     assert record["class"] == "BCA 2024"
     assert record["father_name"] == "Ravi Verma"
+    assert record["dob"] == "2002-05-11"
+    assert record["address"] == "123 Main Street"
+    assert record["hometown"] == "Jaipur"
+    assert record["mobile"] == "9876543210"
+    assert record["email"] == "asha@example.com"
+    assert record["current_employment"] == "Google"
+    assert record["relationship_status"] == "Married"
+    assert record["marriage_date"] == "2024-07-01"
+    assert record["kids"] == 1
+    assert record["spouse_roll_number"] == "2024002"
+    assert record["spouse_name"] == "Rahul Verma"
+    assert record["linkedin_url"] == "https://linkedin.com/in/asha"
     assert record["current_city"] == "Bengaluru"
     assert any(rel["type"] == "BELONGS_TO_CLASS" for rel in record["relationships"])
     assert any(rel["type"] == "WORKED_AT" for rel in record["relationships"])

@@ -18,7 +18,7 @@ class PersonService:
 
     async def create(self, data: dict[str, Any]) -> dict[str, Any]:
         entity = PersonEntity(name=data["name"], **{k: v for k, v in data.items() if k != "name"})
-        props = entity.model_dump(mode="json")
+        props = entity.model_dump(mode="json", by_alias=True)
         return await self._graph.create_node(NodeLabel.PERSON, props, merge_keys=["email"] if entity.email else ["name"])
 
     async def get(self, person_id: str) -> dict[str, Any]:

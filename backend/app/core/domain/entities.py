@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class NodeLabel(str, Enum):
@@ -76,17 +76,25 @@ class MetadataMixin(BaseModel):
 
 
 class PersonEntity(MetadataMixin):
+    model_config = ConfigDict(extra="ignore")
+
     name: str
+    roll_number: str | None = None
+    father_name: str | None = None
+    dob: str | None = None
+    address: str | None = None
+    hometown: str | None = None
+    mobile: str | None = None
     email: str | None = None
-    phone: str | None = None
-    title: str | None = None
-    bio: str | None = None
-    date_of_birth: str | None = None
-    marital_status: str | None = None
-    has_children: bool | None = None
+    class_name: str | None = Field(default=None, alias="class")
+    current_employment: str | None = None
+    relationship_status: str | None = None
+    marriage_date: str | None = None
+    kids: int | None = None
+    spouse_roll_number: str | None = None
+    spouse_name: str | None = None
     linkedin_url: str | None = None
-    tags: list[str] = Field(default_factory=list)
-    extra: dict[str, Any] = Field(default_factory=dict)
+    current_city: str | None = None
 
 
 class CompanyEntity(MetadataMixin):

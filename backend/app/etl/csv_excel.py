@@ -8,18 +8,27 @@ import pandas as pd
 from app.etl.base import BaseETLPipeline
 
 COLUMN_MAPPINGS = {
-    "full_name": "name",
-    "person_name": "name",
-    "company_name": "name",
-    "employer": "company",
-    "organization": "company",
-    "job_title": "title",
-    "position": "title",
-    "location": "city",
-    "skills": "skills",
-    "skill": "skills",
-    "linkedin": "linkedin_url",
+    "roll_number": "roll_number",
+    "name": "name",
+    "class": "class",
+    "father_name": "father_name",
+    "dob": "dob",
+    "address": "address",
+    "hometown": "hometown",
+    "mobile": "mobile",
+    "email": "email",
+    "7th_semester_employment": "7th_semester_employment",
+    "10th_semester_employment": "10th_semester_employment",
+    "current_employment": "current_employment",
+    "relationship_status": "relationship_status",
+    "marraige_date": "marriage_date",
+    "marriage_date": "marriage_date",
+    "kids": "kids",
+    "spouse_roll_number_if_present_in_same_data": "spouse_roll_number",
+    "spouse_roll_number": "spouse_roll_number",
+    "spouse_name": "spouse_name",
     "linkedin_url": "linkedin_url",
+    "current_city": "current_city",
 }
 
 
@@ -116,13 +125,9 @@ class TabularMixin:
                     record[col] = val
 
             if record.get("name"):
-                if not record.get("label"):
-                    if any(key in record for key in ("roll_number", "father_name", "current_city", "current_employment", "spouse_name")):
-                        record["label"] = "Person"
-                        record["merge_keys"] = ["roll_number"] if record.get("roll_number") else ["email", "name"]
-                        record["relationships"].extend(_parse_person_relationships(record))
-                    else:
-                        record["label"] = "Company" if "industry" in record and not record.get("title") else "Person"
+                record["label"] = "Person"
+                record["merge_keys"] = ["roll_number"] if record.get("roll_number") else ["email", "name"]
+                record["relationships"].extend(_parse_person_relationships(record))
                 records.append(record)
 
         return records
