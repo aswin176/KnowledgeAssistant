@@ -5,9 +5,22 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 
+type SettingsData = {
+  llm_model?: string;
+  ollama_model?: string;
+  supported_import_formats?: string[];
+};
+
+type HealthData = {
+  status?: string;
+  neo4j?: boolean;
+  llm?: boolean;
+  version?: string;
+};
+
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<Record<string, unknown> | null>(null);
-  const [health, setHealth] = useState<Record<string, unknown> | null>(null);
+  const [settings, setSettings] = useState<SettingsData | null>(null);
+  const [health, setHealth] = useState<HealthData | null>(null);
 
   useEffect(() => {
     api.getSettings().then(setSettings);
@@ -31,7 +44,7 @@ export default function SettingsPage() {
               <div className="flex justify-between">
                 <span>Overall</span>
                 <span className={health?.status === "healthy" ? "text-green-500" : "text-yellow-500"}>
-                  {health?.status as string || "Unknown"}
+                  {health?.status ?? "Unknown"}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -44,7 +57,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex justify-between">
                 <span>Version</span>
-                <span>{health?.version as string}</span>
+                <span>{health?.version ?? "Unknown"}</span>
               </div>
             </CardContent>
           </Card>
@@ -56,11 +69,11 @@ export default function SettingsPage() {
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>LLM Model</span>
-                <span>{settings?.ollama_model as string}</span>
+                <span>{settings?.ollama_model ?? settings?.llm_model ?? "Unknown"}</span>
               </div>
               <div className="flex justify-between">
                 <span>Import Formats</span>
-                <span>{(settings?.supported_import_formats as string[])?.join(", ")}</span>
+                <span>{settings?.supported_import_formats?.join(", ") ?? "None"}</span>
               </div>
             </CardContent>
           </Card>

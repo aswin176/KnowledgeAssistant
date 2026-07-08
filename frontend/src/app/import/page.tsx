@@ -7,11 +7,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 
+type ImportResult = {
+  status?: string;
+  records_processed?: number;
+  records_created?: number;
+  records_merged?: number;
+  errors?: string[];
+};
+
+type ImportHistoryItem = {
+  filename?: string;
+  status?: string;
+};
+
 export default function ImportPage() {
   const [dragging, setDragging] = useState(false);
-  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [result, setResult] = useState<ImportResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<Record<string, unknown>[]>([]);
+  const [history, setHistory] = useState<ImportHistoryItem[]>([]);
 
   const loadHistory = () => {
     api.listImports().then((data) => setHistory(data.items || []));
@@ -78,9 +91,9 @@ export default function ImportPage() {
                 <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
               )}
               <div>
-                <p className="font-medium">Import {result.status as string}</p>
+                <p className="font-medium">Import {result.status ?? "unknown"}</p>
                 <p className="text-sm text-muted-foreground">
-                  Processed: {result.records_processed as number} · Created: {result.records_created as number} · Merged: {result.records_merged as number}
+                  Processed: {result.records_processed ?? 0} · Created: {result.records_created ?? 0} · Merged: {result.records_merged ?? 0}
                 </p>
               </div>
             </CardContent>
@@ -101,8 +114,8 @@ export default function ImportPage() {
             <div className="space-y-2">
               {history.map((item, i) => (
                 <div key={i} className="flex justify-between text-sm border-b border-border pb-2">
-                  <span>{item.filename as string}</span>
-                  <span className="text-muted-foreground">{item.status as string}</span>
+                  <span>{item.filename ?? "Unnamed import"}</span>
+                  <span className="text-muted-foreground">{item.status ?? "unknown"}</span>
                 </div>
               ))}
             </div>

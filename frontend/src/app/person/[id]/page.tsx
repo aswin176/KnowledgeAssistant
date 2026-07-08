@@ -8,12 +8,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraphViewer } from "@/components/graph/graph-viewer";
 import { api } from "@/lib/api";
 
+type PersonDetail = {
+  id?: string;
+  name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  linkedin_url?: string;
+  marital_status?: string;
+  has_children?: boolean;
+  bio?: string;
+  relationships?: Array<{ type?: string; node?: { name?: string } }>;
+};
+
+type GraphData = {
+  nodes: Array<{ id: string; name?: string; _labels?: string[] }>;
+  relationships: Array<{ type: string; start?: string; end?: string }>;
+};
+
 export default function PersonDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const [person, setPerson] = useState<Record<string, unknown> | null>(null);
-  const [relationships, setRelationships] = useState<Record<string, unknown>[]>([]);
-  const [graph, setGraph] = useState<{ nodes: unknown[]; relationships: unknown[] } | null>(null);
+  const [person, setPerson] = useState<PersonDetail | null>(null);
+  const [relationships, setRelationships] = useState<Array<{ type?: string; node?: { name?: string } }>>([]);
+  const [graph, setGraph] = useState<GraphData | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -39,8 +57,8 @@ export default function PersonDetailPage() {
           <Link href="/person" className="text-sm text-muted-foreground hover:text-primary">
             ← Back to People
           </Link>
-          <h1 className="text-2xl font-semibold mt-2">{person.name as string}</h1>
-          {person.title && <p className="text-muted-foreground">{person.title as string}</p>}
+          <h1 className="text-2xl font-semibold mt-2">{person.name ?? "Unnamed person"}</h1>
+          {person.title && <p className="text-muted-foreground">{person.title}</p>}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -49,19 +67,19 @@ export default function PersonDetailPage() {
               <CardTitle>Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
-              {person.email && <p><span className="font-medium">Email:</span> {person.email as string}</p>}
-              {person.phone && <p><span className="font-medium">Phone:</span> {person.phone as string}</p>}
+              {person.email && <p><span className="font-medium">Email:</span> {person.email}</p>}
+              {person.phone && <p><span className="font-medium">Phone:</span> {person.phone}</p>}
               {person.linkedin_url && (
                 <p>
                   <span className="font-medium">LinkedIn:</span>{" "}
-                  <a href={person.linkedin_url as string} className="text-primary hover:underline" target="_blank" rel="noopener">
-                    {person.linkedin_url as string}
+                  <a href={person.linkedin_url} className="text-primary hover:underline" target="_blank" rel="noopener">
+                    {person.linkedin_url}
                   </a>
                 </p>
               )}
-              {person.marital_status && <p><span className="font-medium">Status:</span> {person.marital_status as string}</p>}
+              {person.marital_status && <p><span className="font-medium">Status:</span> {person.marital_status}</p>}
               {person.has_children != null && <p><span className="font-medium">Children:</span> {person.has_children ? "Yes" : "No"}</p>}
-              {person.bio && <p className="mt-4 text-muted-foreground">{person.bio as string}</p>}
+              {person.bio && <p className="mt-4 text-muted-foreground">{person.bio}</p>}
             </CardContent>
           </Card>
 
@@ -71,17 +89,14 @@ export default function PersonDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {relationships.map((rel, i) => {
-                  const node = rel.node as Record<string, unknown> | undefined;
-                  return (
-                    <div key={i} className="flex items-center gap-2 text-sm">
-                      <span className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                        {rel.type as string}
-                      </span>
-                      <span>{node?.name as string || "Unknown"}</span>
-                    </div>
-                  );
-                })}
+                {relationships.map((rel, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm">
+                    <span className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                      {rel.type ?? "Related"}
+                    </span>
+                    <span>{rel.node?.name ?? "Unknown"}</span>
+                  </div>
+                ))}
                 {relationships.length === 0 && (
                   <p className="text-muted-foreground text-sm">No relationships found.</p>
                 )}
@@ -97,8 +112,8 @@ export default function PersonDetailPage() {
             </CardHeader>
             <CardContent className="h-96">
               <GraphViewer
-                nodes={graph.nodes as { id: string; name?: string; _labels?: string[] }[]}
-                relationships={graph.relationships as { type: string; start?: string; end?: string }[]}
+                nodes={graph.nodes}
+                relationships={graph.relationships}
                 centerId={id}
               />
             </CardContent>

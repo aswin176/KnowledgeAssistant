@@ -5,8 +5,15 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 
+type JobItem = {
+  name?: string;
+  description?: string;
+  status?: string;
+  schedule?: string;
+};
+
 export default function JobsPage() {
-  const [jobs, setJobs] = useState<Record<string, unknown>[]>([]);
+  const [jobs, setJobs] = useState<JobItem[]>([]);
 
   useEffect(() => {
     api.getJobs().then((data) => setJobs(data.items || []));
@@ -23,12 +30,12 @@ export default function JobsPage() {
           {jobs.map((job, i) => (
             <Card key={i}>
               <CardHeader>
-                <CardTitle className="text-base">{job.name as string}</CardTitle>
+                <CardTitle className="text-base">{job.name ?? "Unnamed job"}</CardTitle>
               </CardHeader>
               <CardContent className="text-sm space-y-1">
-                <p className="text-muted-foreground">{job.description as string}</p>
-                <p>Status: <span className="font-medium">{job.status as string}</span></p>
-                <p>Schedule: {job.schedule as string}</p>
+                <p className="text-muted-foreground">{job.description ?? "No description"}</p>
+                <p>Status: <span className="font-medium">{job.status ?? "unknown"}</span></p>
+                <p>Schedule: {job.schedule ?? "Not scheduled"}</p>
               </CardContent>
             </Card>
           ))}
