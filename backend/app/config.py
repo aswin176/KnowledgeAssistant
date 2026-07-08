@@ -23,7 +23,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "Eutridats"
+    app_name: str = "Knowledge Assistant"
     app_env: AppEnv = AppEnv.DEVELOPMENT
     debug: bool = False
     secret_key: str = Field(default="change-me-in-production")
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
-    neo4j_password: str = "eutridats_password"
+    neo4j_password: str = "neo4j"
     neo4j_database: str = "neo4j"
 
     jwt_secret_key: str = Field(default="change-me-jwt-secret")
@@ -44,10 +44,15 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = "admin123"
 
-    ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "qwen3"
+    llm_provider: str = "gemini"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta"
     llm_temperature: float = 0.1
     llm_max_tokens: int = 4096
+
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen3"
 
     redis_url: str = "redis://localhost:6379/0"
     celery_enabled: bool = False

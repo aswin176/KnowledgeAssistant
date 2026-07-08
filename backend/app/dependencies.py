@@ -10,7 +10,7 @@ from app.config import Settings, get_settings
 from app.core.exceptions import AuthenticationError
 from app.etl.registry import ImportService
 from app.infrastructure.auth.jwt import AuthService
-from app.infrastructure.llm.ollama import OllamaLLMService
+from app.infrastructure.llm.gemini import GeminiLLMService
 from app.infrastructure.neo4j.connection import Neo4jConnection
 from app.infrastructure.neo4j.repository import Neo4jGraphRepository
 from app.services.person_service import (
@@ -31,7 +31,7 @@ class Container:
         self.settings = settings or get_settings()
         self.neo4j = Neo4jConnection(self.settings)
         self.graph_repo = Neo4jGraphRepository(self.neo4j)
-        self.llm = OllamaLLMService(self.settings)
+        self.llm = GeminiLLMService(self.settings)
         self.auth = AuthService(self.settings)
         self.agent = KnowledgeGraphAgent(self.llm, self.graph_repo)
         self.import_service = ImportService(self.graph_repo)

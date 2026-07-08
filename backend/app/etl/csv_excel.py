@@ -1,5 +1,6 @@
 """CSV and Excel import pipelines."""
 
+import re
 from typing import Any
 
 import pandas as pd
@@ -23,7 +24,7 @@ COLUMN_MAPPINGS = {
 
 
 def _normalize_column_name(col: str) -> str:
-    return col.strip().lower().replace(" ", "_")
+    return re.sub(r"[^a-z0-9]+", "_", str(col).strip().lower()).strip("_")
 
 
 def _parse_skills(value: Any) -> list[dict[str, Any]]:
@@ -44,6 +45,52 @@ def _parse_city(value: Any) -> list[dict[str, Any]]:
     if not value or (isinstance(value, float) and pd.isna(value)):
         return []
     return [{"type": "LIVES_IN", "target_label": "City", "target_name": str(value).strip()}]
+
+
+def _parse_person_relationships(record: dict[str, Any]) -> list[dict[str, Any]]:
+    relationships: list[dict[str, Any]] = []
+
+    if record.get("class"):
+        relationships.append(
+            {"type": "BELONGS_TO_CLASS", "target_label": "Class", "target_name": str(record["class"]).strip()}
+        )
+    if record.get("current_city"):
+        relationships.append(
+            {"type": "LIVES_IN", "target_label": "City", "target_name": str(record["current_city"]).strip()}
+        )
+    if record.get("hometown"):
+        relationships.append(
+            {"type": "LIVES_IN", "target_label": "City", "target_name": str(record["hometown"]).strip()}
+        )
+    if record.get("address"):
+        relationships.append(
+            {"type": "LIVES_AT", "target_label": "Address", "target_name": str(record["address"]).strip()}
+        )
+    if record.get("father_name"):
+        relationships.append(
+            {"type": "HAS_FATHER", "target_label": "FamilyMember", "target_name": str(record["father_name"]).strip()}
+        )
+    if record.get("spouse_name"):
+        relationships.append(
+            {"type": "MARRIED_TO", "target_label": "Person", "target_name": str(record["spouse_name"]).strip()}
+        )
+    if record.get("7th_semester_employment"):
+        relationships.append(
+            {"type": "WORKED_AT", "target_label": "Company", "target_name": str(record["7th_semester_employment"]).strip()}
+        )
+    if record.get("10th_semester_employment"):
+        relationships.append(
+            {"type": "WORKED_AT", "target_label": "Company", "target_name": str(record["10th_semester_employment"]).strip()}
+        )
+    if record.get("current_employment"):
+        relationships.append(
+            {"type": "WORKS_AT", "target_label": "Company", "target_name": str(record["current_employment"]).strip()}
+        )
+    if record.get("linkedin_url"):
+        relationships.append(
+            {"type": "HAS_PROFILE", "target_label": "LinkedInProfile", "target_name": str(record["linkedin_url"]).strip()}
+        )
+    return relationships
 
 
 class TabularMixin:
@@ -70,9 +117,12 @@ class TabularMixin:
 
             if record.get("name"):
                 if not record.get("label"):
-                    record["label"] = (
-                        "Company" if "industry" in record and not record.get("title") else "Person"
-                    )
+                    if any(key in record for key in ("roll_number", "father_name", "current_city", "current_employment", "spouse_name")):
+                        record["label"] = "Person"
+                        record["merge_keys"] = ["roll_number"] if record.get("roll_number") else ["email", "name"]
+                        record["relationships"].extend(_parse_person_relationships(record))
+                    else:
+                        record["label"] = "Company" if "industry" in record and not record.get("title") else "Person"
                 records.append(record)
 
         return records

@@ -14,30 +14,31 @@ logger = get_logger(__name__)
 
 CYPHER_SYSTEM_PROMPT = """You are a Neo4j Cypher query generator for a personal knowledge graph.
 
-Node labels: Person, Student, Company, Skill, City, Country, University, Class, Project,
+Node labels: Person, Company, Skill, City, Country, University, Class, Project,
 Technology, Award, Certification, Event, Interest, Language, Resume, LinkedInProfile,
 GithubProfile, Website, Organization, FamilyMember, Photo, Document, Note
 
-Relationship types: WORKS_AT, WORKED_AT, STUDIED_IN, HAS_SKILL, LIVES_IN, LOCATED_IN,
-HAS_PROFILE, KNOWS, ATTENDED, HAS_DOCUMENT, HAS_CERTIFICATION, HAS_AWARD, USES_TECHNOLOGY,
-PARTICIPATED_IN, MEMBER_OF, FRIEND_OF, CONNECTED_TO, HAS_NOTE
+Relationship types: WORKS_AT, WORKED_AT, STUDIED_IN, HAS_SKILL, LIVES_IN, LIVES_AT,
+LOCATED_IN, HAS_PROFILE, KNOWS, ATTENDED, HAS_DOCUMENT, HAS_CERTIFICATION, HAS_AWARD,
+USES_TECHNOLOGY, PARTICIPATED_IN, MEMBER_OF, FRIEND_OF, CONNECTED_TO, HAS_NOTE,
+BELONGS_TO_CLASS, MARRIED_TO, HAS_FATHER
 
 Rules:
 1. Generate ONLY read-only Cypher (MATCH, OPTIONAL MATCH, WITH, RETURN, ORDER BY, LIMIT)
 2. Never use CREATE, MERGE, DELETE, SET, REMOVE, DROP
 3. Filter active nodes: WHERE n.is_active IS NULL OR n.is_active = true
 4. Use case-insensitive matching with toLower() when searching names
-5. Return relevant properties: name, id, title, email, and relationship details
+5. Return relevant properties: name, roll_number, email, class, company, city, spouse, and relationship details
 6. Limit results to 50 unless asked for more
 7. Respond with ONLY the Cypher query, no explanation
 
 Example:
 Question: Who works at Google?
 Cypher:
-MATCH (p:Person)-[:WORKS_AT]->(c:Company)
+MATCH (p:Person)-[:WORKS_AT|WORKED_AT]->(c:Company)
 WHERE toLower(c.name) CONTAINS 'google'
   AND (p.is_active IS NULL OR p.is_active = true)
-RETURN p.name AS name, p.id AS id, p.title AS title, c.name AS company
+RETURN p.name AS name, p.roll_number AS roll_number, c.name AS company
 LIMIT 50
 """
 
@@ -99,8 +100,10 @@ class KnowledgeGraphAgent:
 
         graph_keywords = [
             "who", "which", "find", "show", "list", "search", "works at", "worked at",
-            "lives in", "knows", "skill", "company", "classmate", "friend", "attended",
-            "certification", "married", "children", "career", "connected", "profile",
+            "lives in", "current city", "hometown", "knows", "skill", "company",
+            "classmate", "friend", "attended", "certification", "married", "spouse",
+            "children", "career", "connected", "profile", "roll number", "class",
+            "father", "employment", "person",
         ]
         needs_graph = any(kw in question.lower() for kw in graph_keywords)
 

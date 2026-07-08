@@ -42,6 +42,7 @@ class RelationshipType(str, Enum):
     STUDIED_IN = "STUDIED_IN"
     HAS_SKILL = "HAS_SKILL"
     LIVES_IN = "LIVES_IN"
+    LIVES_AT = "LIVES_AT"
     LOCATED_IN = "LOCATED_IN"
     HAS_PROFILE = "HAS_PROFILE"
     KNOWS = "KNOWS"
@@ -56,6 +57,9 @@ class RelationshipType(str, Enum):
     CONNECTED_TO = "CONNECTED_TO"
     HAS_NOTE = "HAS_NOTE"
     RELATED_TO = "RELATED_TO"
+    BELONGS_TO_CLASS = "BELONGS_TO_CLASS"
+    MARRIED_TO = "MARRIED_TO"
+    HAS_FATHER = "HAS_FATHER"
 
 
 class MetadataMixin(BaseModel):

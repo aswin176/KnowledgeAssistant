@@ -1,121 +1,135 @@
-# Eutridats
+# Knowledge Assistant
 
-A production-quality personal knowledge graph AI assistant for managing lifelong knowledge about classmates, colleagues, friends, family, projects, and more.
+This project is a person knowledge-graph assistant built around a Gemini-powered LangGraph workflow. The intended architecture is:
 
-## Features
+- Telegram or UI → Next.js frontend
+- Next.js UI → FastAPI backend
+- FastAPI → LangGraph agent
+- LangGraph agent → Gemini 2.5 Flash API
+- Gemini/agent layer → Neo4j knowledge graph
 
-- **Knowledge Graph** — Neo4j-powered graph with 25+ node types and 19 relationship types
-- **Natural Language Q&A** — LangGraph agent with Ollama (Qwen 3) for questions like "Who works at Google?"
-- **Multi-format Import** — CSV, Excel, JSON, Markdown, PDF, DOCX with duplicate detection and merge
-- **Modern Dashboard** — Next.js frontend with chat, graph explorer, search, and entity detail pages
-- **Telegram Bot** — Search, person lookup, and chat mode via Telegram
-- **Clean Architecture** — Modular, testable, dependency-injected backend
+It is designed to ingest person Excel data, build a graph schema, and then answer natural-language questions about people, classes, careers, cities, spouses, and employment history.
 
-## Quick Start
+## What changed in this version
 
-### Prerequisites
+- Replaced the Ollama-only backend wiring with a Gemini-compatible LLM service.
+- Added a person-focused graph model for people, classes, companies, cities, addresses, family members, and spouse relationships.
+- Added an Excel import path that maps your provided columns into Neo4j nodes and relationships.
+- Added a backend script to load Excel files into Neo4j before starting the app.
+- Kept the existing FastAPI + Next.js structure intact so the UI can continue to work with the new backend.
 
-- Docker & Docker Compose
-- Node.js 20+ (for local frontend dev)
-- Python 3.12 + Poetry (for local backend dev)
+## Supported Excel columns
 
-### Docker (Recommended)
+The importer is configured for the following person columns:
+
+- Roll Number
+- Name
+- Class
+- Father Name
+- DOB
+- Address
+- Hometown
+- Mobile
+- Email
+- 7th Semester Employment
+- 10th Semester Employment
+- Current employment
+- Relationship Status
+- Marraige Date
+- Kids
+- Spouse Roll Number (if present in same data)
+- Spouse name
+- Linkedin URL
+- Current City
+
+The importer creates graph data using these concepts:
+
+- Person node for each record
+- Class node via BELONGS_TO_CLASS
+- Company nodes for employment history via WORKED_AT / WORKS_AT
+- City nodes for hometown and current city via LIVES_IN
+- Address node via LIVES_AT
+- Family member node via HAS_FATHER
+- Spouse relationship via MARRIED_TO
+- LinkedIn profile relationship via HAS_PROFILE
+
+## Recommended setup
+
+### 1. Configure backend settings
+
+Copy the example environment file and update the values:
 
 ```bash
-# Clone and start all services
-cp backend/.env.example backend/.env
-docker compose up -d
-
-# Pull Ollama model
-docker exec eutridats-ollama ollama pull qwen3
-
-# Seed sample data
-docker exec eutridats-backend python scripts/seed_data.py
+cd backend
+copy .env.example .env
 ```
 
-Access:
-- Frontend: http://localhost:3000
-- API Docs: http://localhost:8000/docs
-- Neo4j Browser: http://localhost:7474
+Update the following values in the backend environment:
 
-Default login: `admin` / `admin123`
+- GEMINI_API_KEY
+- NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD / NEO4J_DATABASE
+- CORS_ORIGINS if needed
 
-### Local Development
+### 2. Load Excel data into Neo4j
+
+Run the import script first so the graph schema and nodes exist before starting the application:
 
 ```bash
-# Backend
 cd backend
-cp .env.example .env
+python scripts/load_excel_to_neo4j.py path/to/persons.xlsx
+```
+
+If your workbook has multiple sheets, use:
+
+```bash
+python scripts/load_excel_to_neo4j.py path/to/persons.xlsx --sheet 0
+```
+
+### 3. Start the backend
+
+```bash
+cd backend
 poetry install
 poetry run uvicorn app.main:app --reload
+```
 
-# Frontend
+### 4. Start the frontend
+
+```bash
 cd frontend
 npm install
 npm run dev
-
-# Seed data (requires Neo4j running)
-cd backend && poetry run python scripts/seed_data.py
 ```
 
-## Project Structure
+## Access points
 
-```
-Eutridats/
-├── backend/           # FastAPI backend (Clean Architecture)
+- Frontend: http://localhost:3000
+- API docs: http://localhost:8000/docs
+- Neo4j Browser: http://localhost:7474
+
+Default login: admin / admin123
+
+## Project structure
+
+```text
+KnowledgeAssistant/
+├── backend/            # FastAPI backend with Gemini + LangGraph + Neo4j
 │   ├── app/
-│   │   ├── api/       # REST & WebSocket routes
-│   │   ├── agent/     # LangGraph AI agent
-│   │   ├── core/      # Domain entities & interfaces
-│   │   ├── etl/       # Import pipelines
-│   │   ├── graph/     # Cypher validation
-│   │   ├── infrastructure/  # Neo4j, LLM, Auth
-│   │   ├── services/  # Business logic
-│   │   ├── connectors/ # External data connectors
-│   │   └── scheduler/ # Background jobs
-│   └── tests/
-├── frontend/          # Next.js dashboard
-├── telegram/          # Telegram bot
-├── docs/              # Documentation
-└── docker-compose.yml
+│   │   ├── agent/      # LangGraph agent
+│   │   ├── api/        # API routes
+│   │   ├── etl/        # Excel/CSV import pipelines
+│   │   ├── infrastructure/  # Neo4j, Gemini, auth
+│   │   └── services/   # Business logic
+│   └── scripts/        # Data-loading scripts
+├── frontend/           # Next.js UI
+├── telegram/           # Telegram bot entry point
+└── docs/               # Project docs
 ```
 
-## API Endpoints
+## Technology stack
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/auth/login` | POST | JWT authentication |
-| `/api/v1/chat` | POST | Natural language Q&A |
-| `/api/v1/chat/ws` | WS | Streaming chat |
-| `/api/v1/search` | POST | Hybrid search |
-| `/api/v1/person` | GET/POST | Person CRUD |
-| `/api/v1/company` | GET/POST | Company CRUD |
-| `/api/v1/graph/explore` | POST | Subgraph exploration |
-| `/api/v1/upload` | POST | File import |
-| `/api/v1/jobs` | GET | Background jobs |
-| `/api/v1/health` | GET | Health check |
-
-## Documentation
-
-- [Architecture](docs/architecture.md)
-- [Setup Guide](docs/setup.md)
-- [Deployment Guide](docs/deployment.md)
-- [Schema Documentation](docs/schema.md)
-- [Connector Guide](docs/connectors.md)
-- [Developer Guide](docs/developer.md)
-- [API Reference](docs/api-reference.md)
-
-## Technology Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.12, FastAPI, Poetry |
-| Database | Neo4j Community Edition |
-| AI | Ollama (Qwen 3), LangGraph |
-| Frontend | Next.js, TypeScript, TailwindCSS |
-| Auth | JWT |
-| Bot | python-telegram-bot |
-
-## License
-
-MIT
+- Backend: Python 3.12, FastAPI, LangGraph
+- Database: Neo4j
+- AI: Gemini 2.5 Flash API
+- Frontend: Next.js, TypeScript, Tailwind CSS
+- Auth: JWT

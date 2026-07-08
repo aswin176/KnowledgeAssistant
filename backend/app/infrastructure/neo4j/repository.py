@@ -214,7 +214,7 @@ class Neo4jGraphRepository(GraphRepository):
     async def get_person_profile(self, person_id: str) -> dict[str, Any] | None:
         query = """
         MATCH (p {id: $person_id})
-        WHERE 'Person' IN labels(p) OR 'Student' IN labels(p)
+        WHERE 'Person' IN labels(p)
         OPTIONAL MATCH (p)-[r]->(related)
         WHERE r.is_active IS NULL OR r.is_active = true
         RETURN p,
